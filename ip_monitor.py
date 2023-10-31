@@ -62,6 +62,7 @@ def monitor_ip():
         send_email(current_ip, last_ip)
         with open('/data/last_ip.txt', 'w') as file:
             file.write(current_ip)
+    send_email(current_ip, last_ip)
 
 if __name__ == '__main__':
     monitor_ip()
