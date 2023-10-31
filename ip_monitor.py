@@ -29,9 +29,16 @@ def send_email(new_ip, previous_ip):
     msg["From"] = "ip-monitor@thevandorens.com"
     msg["To"] = "chris@thevandorens.com"
 
+    try:
+        smtp_username = os.environ['SMTP_USERNAME']
+        smtp_password = os.environ['SMTP_PASSWORD']
+    except KeyError as e:
+        logging.error(f'Missing environment variable: {e}')
+        return  # Exit the function if the environment variables are missing
+
     # Send the email
     with smtplib.SMTP_SSL('smtp.fastmail.com', 465) as server:
-        server.login(os.environ['SMTP_USERNAME'], os.environ['SMTP_PASSWORD'])
+        server.login(smtp_username, smtp_password)
         server.send_message(msg)
         logging.info(f'Sent notification: IP changed from {previous_ip} to {new_ip}')
 
