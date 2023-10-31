@@ -14,7 +14,7 @@ def get_public_ip():
         response = requests.get('https://api.ipify.org?format=json')
         response.raise_for_status()  # Raise exception for failed requests
         current_ip = response.json()['ip']
-        logging.info(f'Checked IP: {current_ip}')
+        logging.info(f'Returned IP: {current_ip}')
         return current_ip
     except requests.RequestException as e:
         logging.error(f'Failed to retrieve public IP: {e}')
@@ -49,6 +49,7 @@ def monitor_ip():
     try:
         with open('/data/last_ip.txt', 'r') as file:
             last_ip = file.read().strip()
+            logging.info(f'Updated IP from {previous_ip} to {new_ip}')
     except FileNotFoundError:
         last_ip = None
 
