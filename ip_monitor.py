@@ -1,6 +1,7 @@
 # /mnt/data/ip_monitor.py
 
-import sys, os
+import sys
+import os
 import dotenv
 import logging
 import smtplib
