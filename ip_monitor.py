@@ -49,7 +49,7 @@ def monitor_ip():
     try:
         with open('/data/last_ip.txt', 'r') as file:
             last_ip = file.read().strip()
-            logging.info(f'Updated IP from {previous_ip} to {new_ip}')
+            logging.info(f'Updated IP to {current_ip}')
     except FileNotFoundError:
         last_ip = None
 
