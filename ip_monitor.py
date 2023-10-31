@@ -32,7 +32,7 @@ def send_email(new_ip, previous_ip):
     msg["From"] = "ip-monitor@thevandorens.com"
     msg["To"] = "chris@thevandorens.com"
 
-try:
+    try:
         smtp_username = dotenv.get_key('.env', 'SMTP_USERNAME')  # Use dotenv.get_key
         smtp_password = dotenv.get_key('.env', 'SMTP_PASSWORD')  # Use dotenv.get_key
         logging.info(f'Found .env var: {SMTP_USERNAME}')
