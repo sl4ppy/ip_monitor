@@ -14,10 +14,10 @@ def get_public_ip():
         response = requests.get('https://api.ipify.org?format=json')
         response.raise_for_status()  # Raise exception for failed requests
         current_ip = response.json()['ip']
-        logging.info(f'Returned IP: {current_ip}')
+        logging.info(f'Check returned IP: {current_ip}')
         return current_ip
     except requests.RequestException as e:
-        logging.error(f'Failed to retrieve public IP: {e}')
+        logging.info(f'Failed to retrieve public IP: {e}')
         return None  # Return None if the request fails
 
 def send_email(new_ip, previous_ip):
@@ -34,7 +34,7 @@ def send_email(new_ip, previous_ip):
         smtp_password = os.environ['SMTP_PASSWORD']
         logging.info(f'Found .env var: {SMTP_USERNAME}')
     except KeyError as e:
-        logging.error(f'Missing environment variable: {e}')
+        logging.info(f'Missing environment variable: {e}')
         return  # Exit the function if the environment variables are missing
 
     # Send the email
