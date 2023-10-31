@@ -34,9 +34,9 @@ def send_email(new_ip, previous_ip):
     msg["To"] = "chris@thevandorens.com"
 
     try:
-        smtp_username = dotenv.get_key('.env', 'SMTP_USERNAME')  # Use dotenv.get_key
-        smtp_password = dotenv.get_key('.env', 'SMTP_PASSWORD')  # Use dotenv.get_key
-        logging.info(f'Found .env var: {SMTP_USERNAME}')
+        smtp_username = dotenv.dotenv_values().get('SMTP_USERNAME')  # Modified
+        smtp_password = dotenv.dotenv_values().get('SMTP_PASSWORD')  # Modified
+        logging.info(f'Found .env var: {smtp_username}')
     except KeyError as e:
         logging.info(f'Missing environment variable: {e}')
         return  # Exit the function if the environment variables are missing
