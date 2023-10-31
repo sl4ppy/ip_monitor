@@ -18,8 +18,8 @@ def send_email(new_ip, previous_ip):
     msg['To'] = 'chris@thevandorens.com'
 
     # Send the email via Fastmail's SMTP server
-    with smtplib.SMTP_SSL('smtp.fastmail.com', 465) as server:
-        server.login(os.environ['SMTP_USERNAME'], os.environ['SMTP_PASSWORD'])  # Use environment variables
+        with smtplib.SMTP_SSL('smtp.fastmail.com', 465) as server:
+            server.login(os.environ['SMTP_USERNAME'], os.environ['SMTP_PASSWORD'])  # Use environment variables
         server.send_message(msg)
 
 def monitor_ip():
