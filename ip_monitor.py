@@ -10,15 +10,15 @@ from email.mime.text import MIMEText
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 def get_public_ip():
-    # Retrieve the public IP address by connecting to a remote server
     try:
-        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        s.connect(("8.8.8.8", 80))
-        current_ip = s.getsockname()[0]
+        response = requests.get('https://api.ipify.org?format=json')
+        response.raise_for_status()  # Raise exception for failed requests
+        current_ip = response.json()['ip']
         logging.info(f'Checked IP: {current_ip}')
-    finally:
-        s.close()
-    return current_ip
+        return current_ip
+    except requests.RequestException as e:
+        logging.error(f'Failed to retrieve public IP: {e}')
+        return None  # Return None if the request fails
 
 def send_email(new_ip, previous_ip):
     # Compose the email

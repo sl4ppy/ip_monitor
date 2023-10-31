@@ -12,5 +12,5 @@ COPY ip_monitor.py /usr/src/app/ip_monitor.py
 # Set up the CRON job to run the script every hour
 RUN echo "0 * * * * python /usr/src/app/ip_monitor.py" | crontab -
 
-# Install cron and run it in the foreground to keep the container alive
-CMD ["cron", "-f"]
+# Install cron and requests library
+RUN apt-get update && apt-get install -y cron && pip install requests && rm -rf /var/lib/apt/lists/*
