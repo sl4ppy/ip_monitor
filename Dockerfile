@@ -13,4 +13,4 @@ COPY ip_monitor.py /usr/src/app/ip_monitor.py
 RUN echo "0 * * * * python /usr/src/app/ip_monitor.py" | crontab -
 
 # Install cron and requests library
-RUN apt-get update && apt-get install -y cron && pip install requests && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y cron && pip install requests && pip install python-dotenv && rm -rf /var/lib/apt/lists/*

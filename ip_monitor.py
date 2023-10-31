@@ -32,6 +32,7 @@ def send_email(new_ip, previous_ip):
     try:
         smtp_username = os.environ['SMTP_USERNAME']
         smtp_password = os.environ['SMTP_PASSWORD']
+        logging.info(f'Found .env var: {SMTP_USERNAME}')
     except KeyError as e:
         logging.error(f'Missing environment variable: {e}')
         return  # Exit the function if the environment variables are missing
