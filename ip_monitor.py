@@ -1,6 +1,7 @@
 # /mnt/data/ip_monitor.py
 
 import sys, os
+import dotenv
 import logging
 import smtplib
 import requests  # Import the requests library here
@@ -8,6 +9,8 @@ from email.mime.text import MIMEText
 
 # Configure logging to output to stdout
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+
+dotenv.load_dotenv()
 
 def get_public_ip():
     try:
@@ -29,9 +32,9 @@ def send_email(new_ip, previous_ip):
     msg["From"] = "ip-monitor@thevandorens.com"
     msg["To"] = "chris@thevandorens.com"
 
-    try:
-        smtp_username = os.environ['SMTP_USERNAME']
-        smtp_password = os.environ['SMTP_PASSWORD']
+try:
+        smtp_username = dotenv.get_key('.env', 'SMTP_USERNAME')  # Use dotenv.get_key
+        smtp_password = dotenv.get_key('.env', 'SMTP_PASSWORD')  # Use dotenv.get_key
         logging.info(f'Found .env var: {SMTP_USERNAME}')
     except KeyError as e:
         logging.info(f'Missing environment variable: {e}')
