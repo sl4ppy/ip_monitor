@@ -3,7 +3,7 @@
 import os
 import logging
 import smtplib
-import socket
+import requests  # Import the requests library here
 from email.mime.text import MIMEText
 
 # Configure logging to output to stdout
