@@ -44,8 +44,8 @@ def send_email(new_ip, previous_ip):
             server.send_message(msg)
             logging.info(f'Sent notification: IP changed from {previous_ip} to {new_ip}')
         except smtplib.SMTPException as e:
-            logging.error(f'Failed to send email: {e}')
-            logging.error(f'Server response: {server.last_server_response}')
+            logging.info(f'Failed to send email: {e}')
+            logging.info(f'Server response: {server.last_server_response}')
 
 def monitor_ip():
     # Check the current IP and compare with the last known IP
