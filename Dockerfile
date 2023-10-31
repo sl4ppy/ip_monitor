@@ -1,4 +1,3 @@
-dockerfile
 # path/Dockerfile
 
 # Use a lightweight Python image
