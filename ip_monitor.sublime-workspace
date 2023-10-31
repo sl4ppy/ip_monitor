@@ -1,0 +1,214 @@
+{
+	"auto_complete":
+	{
+		"selected_items":
+		[
+		]
+	},
+	"buffers":
+	[
+	],
+	"build_system": "",
+	"build_system_choices":
+	[
+	],
+	"build_varint": "",
+	"command_palette":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+			[
+				"pack",
+				"Package Control: Install Package"
+			]
+		],
+		"width": 0.0
+	},
+	"console":
+	{
+		"height": 0.0,
+		"history":
+		[
+		]
+	},
+	"distraction_free":
+	{
+		"menu_visible": true,
+		"show_minimap": false,
+		"show_open_files": false,
+		"show_tabs": false,
+		"side_bar_visible": false,
+		"status_bar_visible": false
+	},
+	"expanded_folders":
+	[
+		"/C/Users/chris/seadrive_root/chris/My Libraries/My Library/programming/GitHub/ip_monitor"
+	],
+	"file_history":
+	[
+		"/C/Users/chris/seadrive_root/chris/My Libraries/My Library/programming/GitHub/ip_notifier_docker/docker/Dockerfile",
+		"/C/Users/chris/seadrive_root/chris/My Libraries/My Library/programming/GitHub/ip_notifier_docker/docker-compose.yml",
+		"/C/Users/chris/seadrive_root/chris/My Libraries/My Library/programming/GitHub/ip_notifier_docker/app/requirements.txt",
+		"/C/Users/chris/seadrive_root/chris/My Libraries/My Library/programming/GitHub/ip_notifier_docker/app/ip_change_notifier.py",
+		"/C/Users/chris/seadrive_root/chris/My Libraries/My Library/programming/GitHub/ip_notifier_docker/Dockerfile",
+		"/C/Users/chris/seadrive_root/chris/My Libraries/My Library/programming/GitHub/ip_notifier_docker/import requests.py",
+		"/C/Users/chris/seadrive_root/chris/My Libraries/My Library/Utils/System Utils/Kitty_Portable/sftp/piCaddy.sublime-project",
+		"/C/Program Files (x86)/Steam/steamapps/common/Terraria/Terraria.exe",
+		"/C/Users/chris/Downloads/script.deb.sh",
+		"/C/Users/chris/My Drive/Utils/System Utils/Kitty_Portable/Sessions/Aero-D",
+		"/C/Users/chris/My Drive/Utils/Remote_Server_Mapping/mint_desktop/ansible/pi/inventory",
+		"/C/Users/chris/My Drive/Utils/Remote_Server_Mapping/mint_desktop/ansible/pi/playbook.yml",
+		"/C/Users/chris/My Drive/Utils/Remote_Server_Mapping/mint_desktop/ansible/pi/portainer_agent.yml",
+		"/C/Users/chris/My Drive/Utils/Remote_Server_Mapping/mint_desktop/sftp-config.json",
+		"/C/Users/chris/My Drive/Utils/Remote_Server_Mapping/mint_desktop/ansible/pi/hosts.yml",
+		"/C/Users/chris/My Drive/Utils/System Utils/SublimeText 4/Data/Projects/mint_desktop_SFTP.sublime-project"
+	],
+	"find":
+	{
+		"height": 27.0
+	},
+	"find_in_files":
+	{
+		"height": 101.0,
+		"where_history":
+		[
+			""
+		]
+	},
+	"find_state":
+	{
+		"case_sensitive": false,
+		"find_history":
+		[
+			"0000 F044 8055 0C00 0422 0000 9644",
+			"00 00 F0 44 80 55 0C 00 04 22 00 00 96 44",
+			"0000 F044 8055 0C00 0422 0000 9644",
+			"00 00 F0 44 80 55 0C 00 04 22 00 00 96 44",
+			"/mnt/disk0",
+			"pi"
+		],
+		"highlight": true,
+		"in_selection": false,
+		"preserve_case": false,
+		"regex": false,
+		"replace_history":
+		[
+			"rm -f /mnt/disk0"
+		],
+		"reverse": false,
+		"scrollbar_highlights": true,
+		"show_context": true,
+		"use_buffer2": true,
+		"use_gitignore": true,
+		"whole_word": false,
+		"wrap": true
+	},
+	"groups":
+	[
+		{
+			"sheets":
+			[
+			]
+		}
+	],
+	"incremental_find":
+	{
+		"height": 27.0
+	},
+	"input":
+	{
+		"height": 39.0
+	},
+	"layout":
+	{
+		"cells":
+		[
+			[
+				0,
+				0,
+				1,
+				1
+			]
+		],
+		"cols":
+		[
+			0.0,
+			1.0
+		],
+		"rows":
+		[
+			0.0,
+			1.0
+		]
+	},
+	"menu_visible": true,
+	"output.LSP Log Panel":
+	{
+		"height": 0.0
+	},
+	"output.SFTP":
+	{
+		"height": 126.0
+	},
+	"output.diagnostics":
+	{
+		"height": 0.0
+	},
+	"output.find_results":
+	{
+		"height": 0.0
+	},
+	"output.hex_viewer_inspector":
+	{
+		"height": 0.0
+	},
+	"pinned_build_system": "",
+	"project": "ip_monitor.sublime-project",
+	"replace":
+	{
+		"height": 50.0
+	},
+	"save_all_on_build": true,
+	"select_file":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"select_project":
+	{
+		"height": 500.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 380.0
+	},
+	"select_symbol":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"selected_group": 0,
+	"settings":
+	{
+	},
+	"show_minimap": true,
+	"show_open_files": false,
+	"show_tabs": true,
+	"side_bar_visible": true,
+	"side_bar_width": 280.0,
+	"status_bar_visible": true,
+	"template_settings":
+	{
+	}
+}
