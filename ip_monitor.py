@@ -145,7 +145,7 @@ def monitor_ip():
     except FileNotFoundError:
         last_ip = None
     if current_ip != last_ip:
-        send_email(previous_ip, current_ip, 'IP Address Changed')
+        send_email(last_ip, current_ip, 'IP Address Changed')
         with open('last_ip.txt', 'w') as file:
             file.write(current_ip)
         Session = init_db()
