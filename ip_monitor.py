@@ -9,7 +9,10 @@ import requests  # Import the requests library here
 from email.mime.text import MIMEText
 
 # Configure logging to output to stdout
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(level=logging.DEBUG,
+                    format='%(asctime)s - %(levelname)s - %(message)s',
+                    handlers=[logging.StreamHandler(), logging.FileHandler('/var/log/ip_monitor.log')])
+
 
 dotenv.load_dotenv()
 
@@ -21,7 +24,7 @@ def get_public_ip():
         logging.info(f'Check returned IP: {current_ip}')
         return current_ip
     except requests.RequestException as e:
-        logging.info(f'Failed to retrieve public IP: {e}')
+        logging.exception(f'Failed to retrieve public IP: {e}')
         return None  # Return None if the request fails
 
 def send_email(new_ip, previous_ip):
@@ -37,8 +40,8 @@ def send_email(new_ip, previous_ip):
         smtp_username = dotenv.dotenv_values().get('SMTP_USERNAME')  # Modified
         smtp_password = dotenv.dotenv_values().get('SMTP_PASSWORD')  # Modified
         logging.info(f'Found .env var: {smtp_username}')
-    except KeyError as e:
-        logging.info(f'Missing environment variable: {e}')
+    except smtplib.SMTPException as e:
+        logging.exception(f'Failed to send email: {e}')
         return  # Exit the function if the environment variables are missing
 
     # Send the email

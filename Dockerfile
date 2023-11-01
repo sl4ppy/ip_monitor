@@ -12,8 +12,11 @@ RUN apt-get update && \
 # Copy the script and the .env file into the container
 COPY ip_monitor.py .env /usr/src/app/
 
-# Set up the CRON job to run the script every hour
-RUN echo "0 * * * * python /usr/src/app/ip_monitor.py" | crontab -
+# Set up the CRON job to run the script every hour and log output
+RUN echo "0 * * * * python /usr/src/app/ip_monitor.py >> /var/log/cron.log 2>&1" | crontab -
+
+# Optional: Create a symbolic link to make the log file accessible from outside the container
+RUN ln -s /var/log/ip_monitor.log /usr/src/app/ip_monitor.log
 
 # Command to keep the container running and start cron in the foreground
 CMD ["cron", "-f"]
