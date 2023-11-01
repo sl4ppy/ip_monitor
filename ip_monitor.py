@@ -40,17 +40,12 @@ def init_db():
 def get_ip_data():
     try:
         response = requests.get('https://ipapi.co/json/')
-        response.raise_for_status()  # Raises a HTTPError for bad responses (4xx and 5xx)
+        response.raise_for_status()
     except requests.RequestException as e:
         logging.error(f"Failed to retrieve IP data: {e}")
+        if response.status_code == 429 and 'Retry-After' in response.headers:
+            logging.debug(f"Retry-After: {response.headers['Retry-After']}")
         return None
-
-    # Log the headers and content of the response
-    logging.debug(f"Response Headers: {response.headers}")
-    logging.debug(f"Response Content: {response.content}")
-
-    data = response.json()
-    return data['ip'], data['city'], data['region'], data['country_name']
 
 
 # Function to send email
@@ -132,7 +127,12 @@ def start_scheduler():
 
 # Function to monitor IP
 def monitor_ip():
-    current_ip, city, region, country = get_ip_data()
+    ip_data = get_ip_data()
+    if ip_data is None:
+        logging.error("Failed to get IP data.")
+        return  # Exit the function early
+    current_ip, city, region, country = ip_data
+    
     try:
         with open('last_ip.txt', 'r') as file:
             last_ip = file.read().strip()
