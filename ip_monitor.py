@@ -29,13 +29,19 @@ def get_public_ip():
         return None  # Return None if the request fails
 
 def send_email(new_ip, previous_ip):
+    # Retrieve the email recipient from the .env file
+    email_recipient = dotenv.get_key('.env', 'EMAIL_RECIPIENT')
+    if not email_recipient:
+        logging.error("EMAIL_RECIPIENT not found in .env file.")
+        return  # Exit the function if the email recipient is not specified
+
     # Compose the email
     subject = f"IP Address Changed: {new_ip}"
     body = f"Your IP address has changed from {previous_ip} to {new_ip}."
     msg = MIMEText(body)
     msg["Subject"] = subject
-    msg["From"] = "ip-monitor@thevandorens.com"
-    msg["To"] = "chris@thevandorens.com"
+    msg["From"] = "ip-monitor@fastmail.com"
+    msg["To"] = email_recipient
 
     try:
         smtp_username = dotenv.dotenv_values().get('SMTP_USERNAME')  # Modified
