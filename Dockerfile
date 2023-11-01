@@ -14,7 +14,7 @@ COPY .env /usr/src/app/.env
 RUN echo "0 * * * * python /usr/src/app/ip_monitor.py" | crontab -
 
 # Install necessary Python libraries
-RUN pip install requests python-dotenv sqlalchemy
+RUN pip install requests python-dotenv sqlalchemy apscheduler
 
 # This command will keep the container running and allow cron to execute the script
 CMD ["cron", "-f"]
