@@ -6,9 +6,9 @@ smtp:
   password: your_password
 
 email:
-  from: ip-monitor@thevandorens.com
+  from: $EMAIL_SENDER
   to:
-    - chris@thevandorens.com
+    - $EMAIL_RECIPIENT_1
   subject: IP Address Changed
 
 logging:
@@ -20,6 +20,13 @@ logging:
       when: midnight
       interval: 1
       backupCount: 7
+
+database:
+  url: 'sqlite:///ip_monitor.db'  # Database URL
+
+reporting:
+  frequency: daily  # daily, weekly, or monthly
+  email_recipient_env_var: REPORT_EMAIL  # Name of the environment variable holding the email address
 
 ip_check:
   interval: 60  # minutes

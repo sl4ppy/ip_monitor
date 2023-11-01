@@ -1,128 +1,130 @@
-# /mnt/data/ip_monitor.py
-
-import sys
+# Import required libraries
 import os
-import logging
-import logging.handlers
 import smtplib
+import logging
 import requests
-import yaml
-import jinja2  # Import the jinja2 library
-from email.mime.multipart import MIMEMultipart
+from datetime import datetime, timedelta
 from email.mime.text import MIMEText
-
-from sqlalchemy import create_engine, Column, Integer, String, DateTime, func
+from sqlalchemy import create_engine, Column, Integer, String, DateTime, ForeignKey
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
+from apscheduler.schedulers.background import BackgroundScheduler
 
+# Configure logging
+logging.basicConfig(level=logging.INFO)
 
-# Load configurations from the file
-with open('config.yaml', 'r') as file:
-    config = yaml.safe_load(file)
+# Load environment variables
+from dotenv import load_dotenv
+load_dotenv()
 
-# Configure logging based on configurations
-log_config = config['logging']
-logging.basicConfig(
-    level=log_config['level'],
-    format=log_config['format'],
-    handlers=[
-        logging.handlers.TimedRotatingFileHandler(
-            log_config['file']['path'],
-            when=log_config['file']['rotation']['when'],
-            interval=log_config['file']['rotation']['interval'],
-            backupCount=log_config['file']['rotation']['backupCount']
-        ) if 'file' in log_config else logging.StreamHandler()
-    ]
-)
-
-
-# Define the SQLAlchemy model
+# Database setup
 Base = declarative_base()
+
 class IPChangeEvent(Base):
     __tablename__ = 'ip_change_events'
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    timestamp = Column(DateTime, default=func.now())
+    id = Column(Integer, primary_key=True)
     ip_address = Column(String)
+    timestamp = Column(DateTime, default=datetime.utcnow)
     city = Column(String)
     region = Column(String)
     country = Column(String)
 
-# Database initialization function
+# Function to initialize the database
 def init_db():
-    engine = create_engine('sqlite:///ip_monitor.db')
+    engine = create_engine('sqlite:///ip_events.db')
     Base.metadata.create_all(engine)
     return sessionmaker(bind=engine)
 
+# Function to get IP data
+def get_ip_data():
+    response = requests.get('https://ipapi.co/json/')
+    data = response.json()
+    return data['ip'], data['city'], data['region'], data['country_name']
 
-def get_geolocation(ip_address):
+# Function to send email
+def send_email(body, subject):
+    msg = MIMEText(body, 'html')
+    msg['Subject'] = subject
+    msg['From'] = os.getenv('EMAIL_SENDER')
+    msg['To'] = os.getenv('EMAIL_RECIPIENT')
+    with smtplib.SMTP_SSL(os.getenv('SMTP_SERVER'), os.getenv('SMTP_PORT')) as server:
+        server.login(os.getenv('SMTP_USERNAME'), os.getenv('SMTP_PASSWORD'))
+        server.send_message(msg)
+
+# Function to generate report
+def generate_report(start_date, end_date):
+    Session = init_db()
+    session = Session()
+    events = session.query(IPChangeEvent).filter(
+        IPChangeEvent.timestamp >= start_date,
+        IPChangeEvent.timestamp <= end_date
+    ).all()
+    table = """
+        <table border="1">
+            <tr>
+                <th>Timestamp</th>
+                <th>IP Address</th>
+                <th>City</th>
+                <th>Region</th>
+                <th>Country</th>
+            </tr>
+    """
+    for event in events:
+        table += f"""
+            <tr>
+                <td>{event.timestamp}</td>
+                <td>{event.ip_address}</td>
+                <td>{event.city}</td>
+                <td>{event.region}</td>
+                <td>{event.country}</td>
+            </tr>
+        """
+    table += "</table>"
+    return table
+
+# Function to send scheduled report
+def scheduled_report():
+    end_date = datetime.utcnow()
+    start_date = end_date - timedelta(days=7)
+    report = generate_report(start_date, end_date)
+    body = f"""
+        <html>
+            <body>
+                <h1>IP Change Report</h1>
+                <p>The following table lists all IP change events from {start_date} to {end_date}:</p>
+                {report}
+            </body>
+        </html>
+    """
+    send_email(body, 'Weekly IP Change Report')
+
+# Function to start the scheduler
+def start_scheduler():
+    scheduler = BackgroundScheduler()
+    scheduler.add_job(scheduled_report, 'cron', day_of_week='mon', hour=9, minute=0)
+    scheduler.start()
+
+# Function to monitor IP
+def monitor_ip():
+    current_ip, city, region, country = get_ip_data()
     try:
-        response = requests.get(f'https://ipinfo.io/{ip_address}/json')
-        response.raise_for_status()  # Raise exception for failed requests
-        geolocation = response.json()
-        logging.info(f'Geolocation data for {ip_address}: {geolocation}')
-        return geolocation
-    except requests.RequestException as e:
-        logging.info(f'Failed to retrieve geolocation: {e}')
-        return None  # Return None if the request fails
-
-def get_public_ip():
-    try:
-        response = requests.get('https://api.ipify.org?format=json')
-        response.raise_for_status()  # Raise exception for failed requests
-        current_ip = response.json()['ip']
-        logging.info(f'Check returned IP: {current_ip}')
-        return current_ip
-    except requests.RequestException as e:
-        logging.info(f'Failed to retrieve public IP: {e}')
-        return None  # Return None if the request fails
-
-def send_email(new_ip, previous_ip):
-    email_to = os.getenv('EMAIL_TO').split(',')  # Split EMAIL_TO by comma to get a list of recipients
-    email_from = os.getenv('EMAIL_FROM')
-    smtp_config = config['smtp']
-    geolocation = get_geolocation(new_ip)
-    geolocation_info = f"{geolocation['city']}, {geolocation['region']}, {geolocation['country']}" if geolocation else 'Unknown'
-    # Load and render the email template
-    with open('email_template.html', 'r') as file:
-        template = jinja2.Template(file.read())
-    body = template.render(new_ip=new_ip, previous_ip=previous_ip, geolocation=geolocation_info)
-    
-    msg = MIMEMultipart('alternative')
-    msg["Subject"] = 'IP Address Changed'
-    msg["From"] = email_from
-    
-    msg.attach(MIMEText(body, 'html'))  # Attach the HTML content
-    
-    with smtplib.SMTP_SSL(smtp_config['server'], smtp_config['port']) as server:
-        server.login(smtp_config['username'], smtp_config['password'])
-        for recipient in email_to:
-            msg['To'] = recipient  # Set the recipient in the message header
-            server.send_message(msg)  # Send the email
-            logging.info(f'Sent notification to {recipient}: IP changed from {previous_ip} to {new_ip}')
-
-def monitor_ip(session, force_send=False):
-    # Check the current IP and compare with the last known IP
-    current_ip = get_public_ip()
-    try:
-        with open('/data/last_ip.txt', 'r') as file:
+        with open('last_ip.txt', 'r') as file:
             last_ip = file.read().strip()
     except FileNotFoundError:
         last_ip = None
-    
-    # If the IP has changed or force_send is True, send a notification and update the last known IP
-    if current_ip != last_ip or force_send:
-        send_email(current_ip, last_ip)
-        with open('/data/last_ip.txt', 'w') as file:
+    if current_ip != last_ip:
+        send_email(f'Your IP address has changed to {current_ip}', 'IP Address Changed')
+        with open('last_ip.txt', 'w') as file:
             file.write(current_ip)
-        # Insert a new IP change event into the database
-        event = IPChangeEvent(ip_address=current_ip, city=geolocation['city'],
-                              region=geolocation['region'], country=geolocation['country'])
+        Session = init_db()
+        session = Session()
+        event = IPChangeEvent(ip_address=current_ip, city=city, region=region, country=country)
         session.add(event)
         session.commit()
 
+# Main block
 if __name__ == '__main__':
-    force_send = '--run-now' in sys.argv  # Check if --run-now is specified in the command-line arguments
-    monitor_ip(force_send)
-    Session = init_db()
-    session = Session()
-    monitor_ip(session, force_send)
+    monitor_ip()
+    start_scheduler()
+    while True:
+        pass
