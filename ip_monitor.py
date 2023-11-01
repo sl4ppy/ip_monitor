@@ -4,6 +4,7 @@ import os
 import smtplib
 import logging
 import requests
+import time
 from string import Template
 from pathlib import Path
 from datetime import datetime, timedelta
@@ -15,12 +16,19 @@ from sqlalchemy.orm import declarative_base
 from sqlalchemy.orm import sessionmaker
 from apscheduler.schedulers.background import BackgroundScheduler
 
-# Configure logging
-logging.basicConfig(level=logging.DEBUG)
-
 # Load environment variables
 from dotenv import load_dotenv
 load_dotenv()
+
+MAX_RETRIES = 5
+BACKOFF_FACTOR = 2
+
+# Configure logging
+logging.basicConfig(level=logging.DEBUG)
+
+
+# Global session factory
+SessionFactory = None
 
 # Database setup
 Base = declarative_base()
@@ -36,9 +44,16 @@ class IPChangeEvent(Base):
 
 # Function to initialize the database
 def init_db():
-    engine = create_engine('sqlite:///ip_events.db')
-    Base.metadata.create_all(engine)
-    return sessionmaker(bind=engine)
+    global SessionFactory
+    if SessionFactory is None:
+        engine = create_engine('sqlite:///ip_events.db')
+        Base.metadata.create_all(engine)
+        SessionFactory = sessionmaker(bind=engine)
+
+def get_session():
+    if SessionFactory is None:
+        init_db()
+    return SessionFactory()
 
 # Function to get IP data
 def get_ip_data():
@@ -46,7 +61,7 @@ def get_ip_data():
     headers = {
         "User-Agent": "IP Monitor (your_email@example.com)"  # Identify your app in the User-Agent string
     }
-    while True:  # Keep trying to get the IP data
+    for attempt in range(MAX_RETRIES):
         response = requests.get(url, headers=headers)
         if response.status_code == 200:
             data = response.json()
@@ -59,11 +74,15 @@ def get_ip_data():
         else:
             # Other HTTP error, wait for a short period before retrying
             logging.error(f"Failed to retrieve IP data: {response.status_code} {response.text}")
-            time.sleep(10)
+            wait_time = BACKOFF_FACTOR ** attempt
+            logging.info(f"Retrying in {wait_time} seconds.")
+            time.sleep(wait_time)
+    logging.error(f"Failed to retrieve IP data after {MAX_RETRIES} attempts.")
+    return None
 
 
 # Function to send email
-def send_email(message, subject):
+def send_email(message, subject, previous_ip=None, new_ip=None):
     with smtplib.SMTP_SSL(os.getenv('SMTP_SERVER'), os.getenv('SMTP_PORT')) as server:
         server.login(os.getenv('SMTP_USERNAME'), os.getenv('SMTP_PASSWORD'))
         msg = EmailMessage()
@@ -84,22 +103,25 @@ def send_email(message, subject):
 
 # Function to generate report
 def generate_report(start_date, end_date):
-    Session = init_db()
-    session = Session()
-    events = session.query(IPChangeEvent).filter(
-        IPChangeEvent.timestamp >= start_date,
-        IPChangeEvent.timestamp <= end_date
-    ).all()
-    table = """
-        <table border="1">
-            <tr>
-                <th>Timestamp</th>
-                <th>IP Address</th>
-                <th>City</th>
-                <th>Region</th>
-                <th>Country</th>
-            </tr>
-    """
+    session = get_session()
+    try:
+        events = session.query(IPChangeEvent).filter(
+            IPChangeEvent.timestamp >= start_date,
+            IPChangeEvent.timestamp <= end_date
+        ).all()
+        table = """
+            <table border="1">
+                <tr>
+                    <th>Timestamp</th>
+                    <th>IP Address</th>
+                    <th>City</th>
+                    <th>Region</th>
+                    <th>Country</th>
+                </tr>
+        """
+    finally:
+        session.close()
+        
     for event in events:
         table += f"""
             <tr>
@@ -148,15 +170,20 @@ def monitor_ip():
             last_ip = file.read().strip()
     except FileNotFoundError:
         last_ip = None
+    
     if current_ip != last_ip:
         send_email(f'Your IP address has changed from {last_ip} to {current_ip}', 'IP Address Changed')
         with open('last_ip.txt', 'w') as file:
             file.write(current_ip)
-        Session = init_db()
-        session = Session()
-        event = IPChangeEvent(ip_address=current_ip, city=city, region=region, country=country)
-        session.add(event)
-        session.commit()
+        
+        session = get_session()
+        try:
+            event = IPChangeEvent(ip_address=current_ip, city=city, region=region, country=country)
+            session.add(event)
+            session.commit()
+        finally:
+            session.close()
+
 
 # Main block
 if __name__ == '__main__':
