@@ -39,23 +39,24 @@ def init_db():
 
 # Function to get IP data
 def get_ip_data():
-    url = "https://ipapi.co/json/"
-    response = requests.get(url)
-    
-    logging.debug(f"URL: {url}")
-    logging.debug(f"Request Headers: {response.request.headers}")
-    logging.debug(f"Response Status Code: {response.status_code}")
-    logging.debug(f"Response Headers: {response.headers}")
-    logging.debug(f"Response Body: {response.text}")
-    try:
-        response = requests.get('https://ipapi.co/json/')
-        response.raise_for_status()
-    except requests.RequestException as e:
-        logging.error(f"Failed to retrieve IP data: {e}")
-        return None
-
-    data = response.json()
-    return data['ip'], data['city'], data['region'], data['country_name']
+    url = 'https://ipapi.co/json/'
+    headers = {
+        "User-Agent": "IP Monitor (your_email@example.com)"  # Identify your app in the User-Agent string
+    }
+    while True:  # Keep trying to get the IP data
+        response = requests.get(url, headers=headers)
+        if response.status_code == 200:
+            data = response.json()
+            return data['ip'], data['city'], data['region'], data['country_name']
+        elif response.status_code == 429:
+            # Rate limit exceeded, wait for the duration of the TTL before retrying
+            ttl = int(response.headers.get('X-Ttl', 60))  # Default to 60 seconds if X-Ttl header is missing
+            logging.info(f"Rate limit exceeded. Retrying in {ttl} seconds.")
+            time.sleep(ttl)
+        else:
+            # Other HTTP error, wait for a short period before retrying
+            logging.error(f"Failed to retrieve IP data: {response.status_code} {response.text}")
+            time.sleep(10)
 
 
 # Function to send email
