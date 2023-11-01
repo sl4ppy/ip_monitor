@@ -51,15 +51,27 @@ def get_ip_data():
 
 # Function to send email
 def send_email(message, subject):
-    with smtplib.SMTP_SSL(os.getenv('SMTP_SERVER'), os.getenv('SMTP_PORT')) as server:
-        server.login(os.getenv('SMTP_USERNAME'), os.getenv('SMTP_PASSWORD'))
+    smtp_server = os.getenv('SMTP_SERVER')
+    smtp_port = os.getenv('SMTP_PORT')
+    smtp_username = os.getenv('SMTP_USERNAME')
+    smtp_password = os.getenv('SMTP_PASSWORD')
+    email_sender = os.getenv('EMAIL_SENDER')
+    email_recipient = os.getenv('EMAIL_RECIPIENT')
+
+    logging.info(f'SMTP server: {smtp_server}')
+    logging.info(f'SMTP port: {smtp_port}')
+    logging.info(f'SMTP username: {smtp_username}')
+    logging.info(f'Email sender: {email_sender}')
+    logging.info(f'Email recipient: {email_recipient}')
+
+    with smtplib.SMTP_SSL(smtp_server, smtp_port) as server:
+        server.login(smtp_username, smtp_password)
         msg = EmailMessage()
         msg['Subject'] = subject
-        msg['From'] = os.getenv('EMAIL_SENDER')
-        msg['To'] = os.getenv('EMAIL_RECIPIENT')
+        msg['From'] = email_sender
+        msg['To'] = email_recipient
         msg.set_content(message)
         server.send_message(msg)
-
 
 # Function to generate report
 def generate_report(start_date, end_date):
