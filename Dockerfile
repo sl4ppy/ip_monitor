@@ -1,8 +1,8 @@
 # Use a base image with Python installed
 FROM python:3.8-slim
 
-# Update package list and install cron and necessary build tools
-RUN apt-get install -y cron build-essential && rm -rf /var/lib/apt/lists/*
+# Update package list, install cron and necessary build tools, and clean up in one step
+RUN apt-get update && apt-get install -y cron build-essential && rm -rf /var/lib/apt/lists/*
 
 # Upgrade pip
 RUN pip install --upgrade pip
