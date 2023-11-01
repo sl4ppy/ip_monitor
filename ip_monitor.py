@@ -6,6 +6,7 @@ import logging
 import requests
 from datetime import datetime, timedelta
 from email.mime.text import MIMEText
+from email.message import EmailMessage
 from sqlalchemy import create_engine, Column, Integer, String, DateTime, ForeignKey
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import declarative_base
@@ -38,6 +39,14 @@ def init_db():
 
 # Function to get IP data
 def get_ip_data():
+    url = "https://ipapi.co/json/"
+    response = requests.get(url)
+    
+    logging.debug(f"URL: {url}")
+    logging.debug(f"Request Headers: {response.request.headers}")
+    logging.debug(f"Response Status Code: {response.status_code}")
+    logging.debug(f"Response Headers: {response.headers}")
+    logging.debug(f"Response Body: {response.text}")
     try:
         response = requests.get('https://ipapi.co/json/')
         response.raise_for_status()
