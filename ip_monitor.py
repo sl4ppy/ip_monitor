@@ -5,6 +5,7 @@ import os
 import dotenv
 import logging
 import smtplib
+import argparse
 import requests  # Import the requests library here
 from email.mime.text import MIMEText
 
@@ -70,5 +71,13 @@ def monitor_ip():
         with open('/data/last_ip.txt', 'w') as file:
             file.write(current_ip)
 
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--run-now', action='store_true', help='Run the script immediately')
+    args = parser.parse_args()
+
+    if args.run_now:
+        monitor_ip()
+
 if __name__ == '__main__':
-    monitor_ip()
+    main()
