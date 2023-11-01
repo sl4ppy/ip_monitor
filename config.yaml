@@ -1,0 +1,28 @@
+# config.yaml
+smtp:
+  server: smtp.fastmail.com
+  port: 465
+  username: your_username
+  password: your_password
+
+email:
+  from: ip-monitor@thevandorens.com
+  to:
+    - chris@thevandorens.com
+  subject: IP Address Changed
+
+logging:
+  level: INFO
+  format: '%(asctime)s - %(levelname)s - %(message)s'
+  file:
+    path: /logs/ip_monitor.log
+    rotation:
+      when: midnight
+      interval: 1
+      backupCount: 7
+
+ip_check:
+  interval: 60  # minutes
+  services:
+    - https://api.ipify.org?format=json
+    - https://api.my-ip.io/ip.json
