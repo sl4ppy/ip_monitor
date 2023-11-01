@@ -4,6 +4,7 @@ import os
 import smtplib
 import logging
 import requests
+from string import Template
 from pathlib import Path
 from datetime import datetime, timedelta
 from email.mime.text import MIMEText
@@ -63,7 +64,7 @@ def get_ip_data():
 
 # Function to send email
 def send_email(message, subject):
-    template_path = Path('/usr/src/app/email_template.html')  # Adjusted path
+    template_path = Path('/usr/src/app/email_template.html')
     with smtplib.SMTP_SSL(os.getenv('SMTP_SERVER'), os.getenv('SMTP_PORT')) as server:
         server.login(os.getenv('SMTP_USERNAME'), os.getenv('SMTP_PASSWORD'))
         msg = EmailMessage()
@@ -71,7 +72,8 @@ def send_email(message, subject):
         msg['From'] = os.getenv('EMAIL_SENDER')
         msg['To'] = os.getenv('EMAIL_RECIPIENT')
         html_template = template_path.read_text()
-        msg.add_alternative(html_template.format(content=message), subtype='html')
+        html_content = Template(html_template).substitute(content=message)
+        msg.add_alternative(html_content, subtype='html')
         server.send_message(msg)
 
 
