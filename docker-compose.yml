@@ -1,11 +1,15 @@
+# /mnt/data/docker-compose.yml
 version: '3.1'
-
 services:
   ip-monitor:
+    container_name: ip_monitor  # Specify container name
+    image: ip_monitor-image     # Specify image name
     build:
       context: .
       dockerfile: Dockerfile
     volumes:
-      - /docker/appdata/ip-monitor/data:/data
-    env_file:
-      - .env
+      - ./data:/data
+    environment:
+      - SMTP_USERNAME
+      - SMTP_PASSWORD
+      - EMAIL_RECIPIENT

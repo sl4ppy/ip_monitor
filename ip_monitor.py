@@ -1,22 +1,18 @@
 # /mnt/data/ip_monitor.py
 
-import sys
+import argparse
 import os
 import dotenv
 import logging
 import smtplib
-import argparse
-import requests  # Import the requests library here
-from email.mime.text import MIMEText
+import requests
 from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
 
 # Configure logging to output to stdout
-logging.basicConfig(level=logging.DEBUG,
-                    format='%(asctime)s - %(levelname)s - %(message)s',
-                    handlers=[logging.StreamHandler(), logging.FileHandler('/var/log/ip_monitor.log')])
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
-
-dotenv.load_dotenv()
+dotenv.load_dotenv()  # Load environment variables from the .env file
 
 def get_public_ip():
     try:
@@ -26,18 +22,15 @@ def get_public_ip():
         logging.info(f'Check returned IP: {current_ip}')
         return current_ip
     except requests.RequestException as e:
-        logging.exception(f'Failed to retrieve public IP: {e}')
+        logging.info(f'Failed to retrieve public IP: {e}')
         return None  # Return None if the request fails
 
 def send_email(new_ip, previous_ip):
-    # Retrieve the email recipient from the .env file
-    email_recipient = dotenv.dotenv_values().get('EMAIL_RECIPIENT')
+    email_recipient = dotenv.get_key('.env', 'EMAIL_RECIPIENT')
     if not email_recipient:
         logging.error("EMAIL_RECIPIENT not found in .env file.")
         return  # Exit the function if the email recipient is not specified
 
-    # Compose the email
-    
     # Create a MIMEText object for the HTML content
     html_content = f"""
     <html>
@@ -59,11 +52,10 @@ def send_email(new_ip, previous_ip):
     msg["To"] = email_recipient
 
     try:
-        smtp_username = dotenv.dotenv_values().get('SMTP_USERNAME')  # Modified
-        smtp_password = dotenv.dotenv_values().get('SMTP_PASSWORD')  # Modified
-        logging.info(f'Found .env var: {smtp_username}')
-    except smtplib.SMTPException as e:
-        logging.exception(f'Failed to send email: {e}')
+        smtp_username = dotenv.get_key('.env', 'SMTP_USERNAME')
+        smtp_password = dotenv.get_key('.env', 'SMTP_PASSWORD')
+    except KeyError as e:
+        logging.info(f'Missing environment variable: {e}')
         return  # Exit the function if the environment variables are missing
 
     # Send the email
@@ -76,29 +68,28 @@ def send_email(new_ip, previous_ip):
             logging.info(f'Failed to send email: {e}')
             logging.info(f'Server response: {server.last_server_response}')
 
-def monitor_ip():
+def monitor_ip(force_send=False):
     # Check the current IP and compare with the last known IP
     current_ip = get_public_ip()
     try:
         with open('/data/last_ip.txt', 'r') as file:
             last_ip = file.read().strip()
-            logging.info(f'Updated IP to {current_ip}')
     except FileNotFoundError:
         last_ip = None
 
-    # If the IP has changed, send a notification and update the last known IP
-    if current_ip != last_ip:
+    # If the IP has changed or force_send is True, send a notification and update the last known IP
+    if current_ip != last_ip or force_send:
         send_email(current_ip, last_ip)
         with open('/data/last_ip.txt', 'w') as file:
             file.write(current_ip)
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--run-now', action='store_true', help='Run the script immediately')
+    parser.add_argument('--run-now', action='store_true', help='Run the script immediately and send email notification')
     args = parser.parse_args()
 
     if args.run_now:
-        monitor_ip()
+        monitor_ip(force_send=True)  # Pass the force_send argument as True
 
 if __name__ == '__main__':
     main()
