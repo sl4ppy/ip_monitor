@@ -4,6 +4,7 @@ import os
 import smtplib
 import logging
 import requests
+from pathlib import Path
 from datetime import datetime, timedelta
 from email.mime.text import MIMEText
 from email.message import EmailMessage
@@ -62,26 +63,23 @@ def get_ip_data():
 
 # Function to send email
 def send_email(message, subject):
-    smtp_server = os.getenv('SMTP_SERVER')
-    smtp_port = os.getenv('SMTP_PORT')
-    smtp_username = os.getenv('SMTP_USERNAME')
-    smtp_password = os.getenv('SMTP_PASSWORD')
-    email_sender = os.getenv('EMAIL_SENDER')
-    email_recipient = os.getenv('EMAIL_RECIPIENT')
-
-    logging.info(f'SMTP server: {smtp_server}')
-    logging.info(f'SMTP port: {smtp_port}')
-    logging.info(f'SMTP username: {smtp_username}')
-    logging.info(f'Email sender: {email_sender}')
-    logging.info(f'Email recipient: {email_recipient}')
-
-    with smtplib.SMTP_SSL(smtp_server, smtp_port) as server:
-        server.login(smtp_username, smtp_password)
+    with smtplib.SMTP_SSL(os.getenv('SMTP_SERVER'), os.getenv('SMTP_PORT')) as server:
+        server.login(os.getenv('SMTP_USERNAME'), os.getenv('SMTP_PASSWORD'))
         msg = EmailMessage()
         msg['Subject'] = subject
-        msg['From'] = email_sender
-        msg['To'] = email_recipient
-        msg.set_content(message)
+        msg['From'] = os.getenv('EMAIL_SENDER')
+        msg['To'] = os.getenv('EMAIL_RECIPIENT')
+
+        # Load the HTML template
+        template_path = Path('email_template.html')
+        html_template = template_path.read_text()
+
+        # Insert the message into the HTML template
+        html_message = html_template.replace('{{message}}', message)
+        
+        # Add HTML version as an alternative to the plain text content
+        msg.add_alternative(html_message, subtype='html')
+        
         server.send_message(msg)
 
 # Function to generate report
