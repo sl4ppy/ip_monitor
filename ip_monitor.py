@@ -82,7 +82,7 @@ def get_ip_data():
 
 
 # Function to send email
-def send_email(message, subject):
+def send_email(message, subject, previous_ip, new_ip):
     with smtplib.SMTP_SSL(os.getenv('SMTP_SERVER'), os.getenv('SMTP_PORT')) as server:
         server.login(os.getenv('SMTP_USERNAME'), os.getenv('SMTP_PASSWORD'))
         msg = EmailMessage()
@@ -172,7 +172,7 @@ def monitor_ip():
         last_ip = None
     
     if current_ip != last_ip:
-        send_email(f'Your IP address has changed from {last_ip} to {current_ip}', 'IP Address Changed')
+        send_email(f'Your IP address has changed from {last_ip} to {current_ip}', 'IP Address Changed', last_ip, current_ip)
         with open('last_ip.txt', 'w') as file:
             file.write(current_ip)
         
