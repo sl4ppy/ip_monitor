@@ -131,7 +131,13 @@ def monitor_ip():
 
 # Main block
 if __name__ == '__main__':
-    monitor_ip()
-    start_scheduler()
-    while True:
-        pass
+    if '--run-now' in sys.argv:
+        monitor_ip()
+    else:
+        scheduler = BackgroundScheduler()
+        scheduler.add_job(monitor_ip, 'interval', minutes=config['ip_check']['interval'])
+        scheduler.start()
+
+        # Shut down the scheduler when exiting the app
+        atexit.register(lambda: scheduler.shutdown())
+
