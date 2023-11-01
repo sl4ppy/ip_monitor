@@ -65,7 +65,7 @@ def monitor_ip():
         last_ip = None
 
     # If the IP has changed, send a notification and update the last known IP
-    if current_ip != last_ip  or len(sys.argv) > 1:
+    if current_ip != last_ip:
         send_email(current_ip, last_ip)
         with open('/data/last_ip.txt', 'w') as file:
             file.write(current_ip)
