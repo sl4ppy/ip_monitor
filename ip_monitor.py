@@ -12,7 +12,7 @@ from sqlalchemy.orm import declarative_base
 from apscheduler.schedulers.background import BackgroundScheduler
 
 # Configure logging
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.DEBUG)
 
 # Load environment variables
 from dotenv import load_dotenv
@@ -40,13 +40,17 @@ def init_db():
 def get_ip_data():
     try:
         response = requests.get('https://ipapi.co/json/')
-        response.raise_for_status()
-        data = response.json()
-        print(data)  # Log the data to see its structure
-        return data['ip'], data['city'], data['region'], data['country_name']
+        response.raise_for_status()  # Raises a HTTPError for bad responses (4xx and 5xx)
     except requests.RequestException as e:
-        logging.error(f'Failed to retrieve IP data: {e}')
-        return None, None, None, None
+        logging.error(f"Failed to retrieve IP data: {e}")
+        return None
+
+    # Log the headers and content of the response
+    logging.debug(f"Response Headers: {response.headers}")
+    logging.debug(f"Response Content: {response.content}")
+
+    data = response.json()
+    return data['ip'], data['city'], data['region'], data['country_name']
 
 
 # Function to send email
