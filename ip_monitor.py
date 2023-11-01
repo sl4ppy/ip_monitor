@@ -63,19 +63,23 @@ def get_ip_data():
 
 
 # Function to send email
-def send_email(previous_ip, new_ip, subject):
-    template_path = Path('/usr/src/app/email_template.html')
+def send_email(message, subject):
     with smtplib.SMTP_SSL(os.getenv('SMTP_SERVER'), os.getenv('SMTP_PORT')) as server:
         server.login(os.getenv('SMTP_USERNAME'), os.getenv('SMTP_PASSWORD'))
         msg = EmailMessage()
         msg['Subject'] = subject
         msg['From'] = os.getenv('EMAIL_SENDER')
         msg['To'] = os.getenv('EMAIL_RECIPIENT')
-        html_template = template_path.read_text()
-        html_content = Template(html_template).substitute(previous_ip=previous_ip, new_ip=new_ip)
-        msg.add_alternative(html_content, subtype='html')
-        server.send_message(msg)
 
+        # Load and format the HTML template
+        template_path = Path(__file__).parent / 'email_template.html'
+        html_template = template_path.read_text()
+
+        # Replace tokens using the correct format
+        formatted_html = html_template.replace("{{ previous_ip }}", previous_ip).replace("{{ new_ip }}", new_ip)
+
+        msg.add_alternative(formatted_html, subtype='html')
+        server.send_message(msg)
 
 
 # Function to generate report
@@ -145,7 +149,7 @@ def monitor_ip():
     except FileNotFoundError:
         last_ip = None
     if current_ip != last_ip:
-        send_email(last_ip, current_ip, 'IP Address Changed')
+        send_email(f'Your IP address has changed from {last_ip} to {current_ip}', 'IP Address Changed')
         with open('last_ip.txt', 'w') as file:
             file.write(current_ip)
         Session = init_db()
