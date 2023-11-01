@@ -8,6 +8,7 @@ import smtplib
 import argparse
 import requests  # Import the requests library here
 from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 
 # Configure logging to output to stdout
 logging.basicConfig(level=logging.DEBUG,
@@ -36,6 +37,23 @@ def send_email(new_ip, previous_ip):
         return  # Exit the function if the email recipient is not specified
 
     # Compose the email
+    
+    # Create a MIMEText object for the HTML content
+    html_content = f"""
+    <html>
+        <body style="font-family: Arial, sans-serif; background-color: #f4f4f4; padding: 20px;">
+            <div style="max-width: 600px; margin: auto; background-color: #ffffff; padding: 20px; border-radius: 8px; text-align: center;">
+                <h1 style="color: #333333;">IP Address Changed</h1>
+                <p style="color: #666666; font-size: 18px;">Your IP address has changed.</p>
+                <p style="color: #666666; font-size: 18px;">Previous IP: <strong>{previous_ip}</strong></p>
+                <p style="color: #666666; font-size: 18px;">New IP: <strong>{new_ip}</strong></p>
+            </div>
+        </body>
+    </html>
+    """
+    msg = MIMEMultipart("alternative")
+    msg.attach(MIMEText(html_content, 'html'))
+
     subject = f"IP Address Changed: {new_ip}"
     body = f"Your IP address has changed from {previous_ip} to {new_ip}."
     msg = MIMEText(body)
