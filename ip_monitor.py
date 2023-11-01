@@ -82,7 +82,7 @@ def get_ip_data():
 
 
 # Function to send email
-def send_email(message, subject, previous_ip=None, new_ip=None):
+def send_email(message, subject):
     with smtplib.SMTP_SSL(os.getenv('SMTP_SERVER'), os.getenv('SMTP_PORT')) as server:
         server.login(os.getenv('SMTP_USERNAME'), os.getenv('SMTP_PASSWORD'))
         msg = EmailMessage()
@@ -95,7 +95,7 @@ def send_email(message, subject, previous_ip=None, new_ip=None):
         html_template = template_path.read_text()
 
         # Replace tokens using the correct format
-        formatted_html = html_template.replace("{{ previous_ip }}", previous_ip).replace("{{ new_ip }}", new_ip)
+        formatted_html = html_template.replace("{{ previous_ip }}", str(previous_ip)).replace("{{ new_ip }}", str(new_ip))
 
         msg.add_alternative(formatted_html, subtype='html')
         server.send_message(msg)
@@ -121,7 +121,7 @@ def generate_report(start_date, end_date):
         """
     finally:
         session.close()
-        
+
     for event in events:
         table += f"""
             <tr>
