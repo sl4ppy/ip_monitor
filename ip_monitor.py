@@ -54,11 +54,8 @@ def send_email(new_ip, previous_ip):
     msg = MIMEMultipart("alternative")
     msg.attach(MIMEText(html_content, 'html'))
 
-    subject = f"IP Address Changed: {new_ip}"
-    body = f"Your IP address has changed from {previous_ip} to {new_ip}."
-    msg = MIMEText(body)
-    msg["Subject"] = subject
-    msg["From"] = "ip-monitor@fastmail.com"
+    msg["Subject"] = f"IP Address Changed: {new_ip}"
+    msg["From"] = "ip-monitor@thevandorens.com"
     msg["To"] = email_recipient
 
     try:
