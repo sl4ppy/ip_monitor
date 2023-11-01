@@ -3,9 +3,6 @@
 # Pull the latest
 #git pull
 
-# Navigate to project directory
-cd ~/github/ip_monitor
-
 # Build the Docker image
 docker-compose build
 
