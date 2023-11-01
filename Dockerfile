@@ -2,7 +2,10 @@
 FROM python:3.8-slim
 
 # Update package list and install cron and necessary build tools
-RUN apt-get update && apt-get install -y cron build-essential && rm -rf /var/lib/apt/lists/*
+RUN apt-get install -y cron build-essential && rm -rf /var/lib/apt/lists/*
+
+# Upgrade pip
+RUN pip install --upgrade pip
 
 # Copy the script and other necessary files into the container
 COPY ip_monitor.py /usr/src/app/ip_monitor.py
