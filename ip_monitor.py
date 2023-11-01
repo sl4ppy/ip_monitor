@@ -31,7 +31,7 @@ def get_public_ip():
 
 def send_email(new_ip, previous_ip):
     # Retrieve the email recipient from the .env file
-    email_recipient = dotenv.get_key('.env', 'EMAIL_RECIPIENT')
+    email_recipient = dotenv.dotenv_values().get('EMAIL_RECIPIENT')
     if not email_recipient:
         logging.error("EMAIL_RECIPIENT not found in .env file.")
         return  # Exit the function if the email recipient is not specified
