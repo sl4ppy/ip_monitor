@@ -63,24 +63,17 @@ def get_ip_data():
 
 # Function to send email
 def send_email(message, subject):
+    template_path = Path('/usr/src/app/email_template.html')  # Adjusted path
     with smtplib.SMTP_SSL(os.getenv('SMTP_SERVER'), os.getenv('SMTP_PORT')) as server:
         server.login(os.getenv('SMTP_USERNAME'), os.getenv('SMTP_PASSWORD'))
         msg = EmailMessage()
         msg['Subject'] = subject
         msg['From'] = os.getenv('EMAIL_SENDER')
         msg['To'] = os.getenv('EMAIL_RECIPIENT')
-
-        # Load the HTML template
-        template_path = Path('./email_template.html')
         html_template = template_path.read_text()
-
-        # Insert the message into the HTML template
-        html_message = html_template.replace('{{message}}', message)
-        
-        # Add HTML version as an alternative to the plain text content
-        msg.add_alternative(html_message, subtype='html')
-        
+        msg.add_alternative(html_template.format(content=message), subtype='html')
         server.send_message(msg)
+
 
 # Function to generate report
 def generate_report(start_date, end_date):
