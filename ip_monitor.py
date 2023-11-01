@@ -7,7 +7,7 @@ from datetime import datetime, timedelta
 from email.mime.text import MIMEText
 from sqlalchemy import create_engine, Column, Integer, String, DateTime, ForeignKey
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import declarative_base
 from apscheduler.schedulers.background import BackgroundScheduler
 
 # Configure logging
@@ -37,9 +37,16 @@ def init_db():
 
 # Function to get IP data
 def get_ip_data():
-    response = requests.get('https://ipapi.co/json/')
-    data = response.json()
-    return data['ip'], data['city'], data['region'], data['country_name']
+    try:
+        response = requests.get('https://ipapi.co/json/')
+        response.raise_for_status()
+        data = response.json()
+        print(data)  # Log the data to see its structure
+        return data['ip'], data['city'], data['region'], data['country_name']
+    except requests.RequestException as e:
+        logging.error(f'Failed to retrieve IP data: {e}')
+        return None, None, None, None
+
 
 # Function to send email
 def send_email(body, subject):
