@@ -43,9 +43,10 @@ def get_ip_data():
         response.raise_for_status()
     except requests.RequestException as e:
         logging.error(f"Failed to retrieve IP data: {e}")
-        if response.status_code == 429 and 'Retry-After' in response.headers:
-            logging.debug(f"Retry-After: {response.headers['Retry-After']}")
         return None
+
+    data = response.json()
+    return data['ip'], data['city'], data['region'], data['country_name']
 
 
 # Function to send email
