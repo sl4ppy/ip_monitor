@@ -71,7 +71,7 @@ def send_email(message, subject):
         msg['To'] = os.getenv('EMAIL_RECIPIENT')
 
         # Load the HTML template
-        template_path = Path('email_template.html')
+        template_path = Path('./email_template.html')
         html_template = template_path.read_text()
 
         # Insert the message into the HTML template
