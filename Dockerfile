@@ -14,7 +14,7 @@ COPY ip_query_cli.py /usr/src/app/ip_query_cli.py
 RUN echo "0 * * * * python /usr/src/app/ip_monitor.py" | crontab -
 
 # Install necessary Python libraries
-RUN pip install requests python-dotenv sqlalchemy apscheduler pyyaml
+RUN pip install requests python-dotenv sqlalchemy apscheduler pyyaml --root-user-action=ignore
 
 # Keep the container running
 CMD ["cron", "-f"]
