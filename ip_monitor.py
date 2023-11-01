@@ -12,7 +12,7 @@ from email.mime.text import MIMEText
 # Configure logging to output to stdout
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
-dotenv.load_dotenv()  # Load environment variables from the .env file
+env_vars = dotenv.dotenv_values()  # Load environment variables into a dictionary
 
 def get_public_ip():
     try:
@@ -26,7 +26,7 @@ def get_public_ip():
         return None  # Return None if the request fails
 
 def send_email(new_ip, previous_ip):
-    email_recipient = dotenv.get_key('.env', 'EMAIL_RECIPIENT')
+    email_recipient = env_vars.get('EMAIL_RECIPIENT')
     if not email_recipient:
         logging.error("EMAIL_RECIPIENT not found in .env file.")
         return  # Exit the function if the email recipient is not specified
@@ -51,13 +51,9 @@ def send_email(new_ip, previous_ip):
     msg["From"] = "ip-monitor@thevandorens.com"
     msg["To"] = email_recipient
 
-    try:
-        smtp_username = dotenv.get_key('.env', 'SMTP_USERNAME')
-        smtp_password = dotenv.get_key('.env', 'SMTP_PASSWORD')
-    except KeyError as e:
-        logging.info(f'Missing environment variable: {e}')
-        return  # Exit the function if the environment variables are missing
-
+    smtp_username = env_vars.get('SMTP_USERNAME')
+    smtp_password = env_vars.get('SMTP_PASSWORD')
+    
     # Send the email
     with smtplib.SMTP_SSL('smtp.fastmail.com', 465) as server:
         try:
